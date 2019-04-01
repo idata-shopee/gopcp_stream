@@ -1,2 +1,19 @@
 # gopcp_stream
-stream protocol supporting for golang pcp
+
+Stream protocol supporting for golang pcp
+
+## Stream behaviour
+
+```
+                                      request stream
+
++-----------------+ +-------------------------------------------> +-------------------+
+|                 |                                               |                   |
+|                 |                                               |                   |
+|                 |               response chunk by chunk         |                   |
+|      Client     | <-------------------------------------------+ |      Server       |
+|                 |                                               |                   |
+|                 |                                               |                   |
+|                 |              response end or error            |                   |
++-----------------+ <-------------------------------------------+ +-------------------+
+```
