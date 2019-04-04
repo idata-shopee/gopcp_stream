@@ -53,4 +53,5 @@ func TestBase(t *testing.T) {
 	cmd, _ := pcpClient.ToJSON(*callExp)
 	serverSide.Execute(cmd, nil)
 	assertEqual(t, "(1(2(3", sum, "")
+	streamClient.Clean()
 }

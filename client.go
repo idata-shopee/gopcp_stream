@@ -27,6 +27,12 @@ type StreamClient struct {
 	pcpClient   gopcp.PcpClient
 }
 
+// clean stream client to avoid memory leak
+// eg: when connction is broken, clean it
+func (sc *StreamClient) Clean() {
+	sc.callbackMap = sync.Map{}
+}
+
 // register callback
 func (sc *StreamClient) StreamCallback(callbackFunc StreamCallbackFunc) string {
 	id := uuid.NewV4().String()
