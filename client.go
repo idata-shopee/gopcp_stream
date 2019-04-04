@@ -25,11 +25,15 @@ type StreamCallbackFunc = func(t int, d interface{})
 type StreamClient struct {
 	callbackMap sync.Map
 	pcpClient   gopcp.PcpClient
+	cleanMutex  *sync.Mutex
 }
 
 // clean stream client to avoid memory leak
 // eg: when connction is broken, clean it
 func (sc *StreamClient) Clean() {
+	sc.cleanMutex.Lock()
+	defer sc.cleanMutex.Unlock()
+
 	sc.callbackMap = sync.Map{}
 }
 
@@ -96,6 +100,7 @@ func streamFormatError(args []interface{}) error {
 
 func GetStreamClient() *StreamClient {
 	var cm sync.Map
-	sc := StreamClient{cm, gopcp.PcpClient{}}
+	var cleanMutex = &sync.Mutex{}
+	sc := StreamClient{cm, gopcp.PcpClient{}, cleanMutex}
 	return &sc
 }
