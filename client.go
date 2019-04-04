@@ -24,6 +24,7 @@ type StreamCallbackFunc = func(t int, d interface{})
 // streamMap {streamId, callbackFunction}
 type StreamClient struct {
 	callbackMap sync.Map
+	pcpClient   gopcp.PcpClient
 }
 
 // register callback
@@ -31,6 +32,21 @@ func (sc *StreamClient) StreamCallback(callbackFunc StreamCallbackFunc) string {
 	id := uuid.NewV4().String()
 	sc.callbackMap.Store(id, callbackFunc)
 	return id
+}
+
+// simple convension for stream calling
+// (streamFunName, ...params, streamCallback)
+func (sc *StreamClient) StreamCall(streamFunName string, params ...interface{}) (*gopcp.CallResult, error) {
+	if len(params) < 1 {
+		return nil, errors.New("missing stream callback function for stream call.")
+	} else if callbackFun, ok := params[len(params)-1].(StreamCallbackFunc); !ok {
+		return nil, errors.New("missing stream callback function for stream call.")
+	} else {
+		callbackParam := sc.StreamCallback(callbackFun)
+		args := append(params[:len(params)-1], callbackParam)
+		callExp := sc.pcpClient.Call(streamFunName, args...)
+		return &callExp, nil
+	}
 }
 
 // accept stream response from server
@@ -74,6 +90,6 @@ func streamFormatError(args []interface{}) error {
 
 func GetStreamClient() *StreamClient {
 	var cm sync.Map
-	sc := StreamClient{cm}
+	sc := StreamClient{cm, gopcp.PcpClient{}}
 	return &sc
 }

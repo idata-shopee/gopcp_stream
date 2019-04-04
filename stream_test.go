@@ -30,29 +30,27 @@ func TestBase(t *testing.T) {
 	streamServer := GetStreamServer("stream_accept", func(command string, timeout time.Duration) (interface{}, error) {
 		return clientSide.Execute(command, nil)
 	})
+
 	serverSide := gopcp.NewPcpServer(gopcp.GetSandbox(map[string]*gopcp.BoxFunc{
-		"streamApi": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
-
-			streamId := args[0].(string)
-
-			streamServer.sendData(streamId, "1", 10*time.Second)
-			streamServer.sendData(streamId, "2", 10*time.Second)
-			streamServer.sendData(streamId, "3", 10*time.Second)
-			streamServer.sendEnd(streamId, 10*time.Second)
-
+		"streamApi": streamServer.StreamApi(func(streamProducer StreamProducer, args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+			seed := args[0].(string)
+			streamProducer.SendData(seed+"1", 10*time.Second)
+			streamProducer.SendData(seed+"2", 10*time.Second)
+			streamProducer.SendData(seed+"3", 10*time.Second)
+			streamProducer.SendEnd(10 * time.Second)
 			return nil, nil
 		}),
 	}))
 
 	// client call server stream api
 	sum := ""
-	cmd, _ := pcpClient.ToJSON(
-		pcpClient.Call("streamApi", streamClient.StreamCallback(func(t int, d interface{}) {
-			if t == STREAM_DATA {
-				sum += d.(string)
-			}
-		})),
-	)
+	callExp, _ := streamClient.StreamCall("streamApi", "(", func(t int, d interface{}) {
+		if t == STREAM_DATA {
+			sum += d.(string)
+		}
+	})
+
+	cmd, _ := pcpClient.ToJSON(*callExp)
 	serverSide.Execute(cmd, nil)
-	assertEqual(t, "123", sum, "")
+	assertEqual(t, "(1(2(3", sum, "")
 }

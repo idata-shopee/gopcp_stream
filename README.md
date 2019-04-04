@@ -37,10 +37,10 @@ serverSide := gopcp.NewPcpServer(gopcp.GetSandbox(map[string]*gopcp.BoxFunc{
     "streamApi": gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 		streamId := args[0].(string)
 
-		streamServer.sendData(streamId, "1", 10*time.Second)
-		streamServer.sendData(streamId, "2", 10*time.Second)
-		streamServer.sendData(streamId, "3", 10*time.Second)
-		streamServer.sendEnd(streamId, 10*time.Second)
+		streamServer.SendData(streamId, "1", 10*time.Second)
+		streamServer.SendData(streamId, "2", 10*time.Second)
+		streamServer.SendData(streamId, "3", 10*time.Second)
+		streamServer.SendEnd(streamId, 10*time.Second)
 
 		return nil, nil
 	}),
