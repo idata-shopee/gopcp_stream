@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/idata-shopee/gopcp"
 	"github.com/satori/go.uuid"
+	"math"
 	"sync"
 )
 
@@ -14,12 +15,6 @@ import (
 // In this design, we seperate those two procedures, and use uuid to connect them.
 // In calling interface view, it should be one procedure, but at bottom it could be seperated.
 // eg: call("some_remote_stream", StreamCallback((type, data) => {}))
-
-// callback type: data, end, error
-
-const STREAM_DATA = 0
-const STREAM_END = 1
-const STREAM_ERROR = 2
 
 // if t is 0, d is the data of this chunk
 // if t is 1, d is the error object
@@ -47,6 +42,7 @@ func (sc *StreamClient) Accept(sid string, t int, d interface{}) error {
 	} else if fun, ok := callbackFun.(StreamCallbackFunc); !ok {
 		return errors.New(fmt.Sprintf("stream callback function type error for id: %s. callbackFun=%v", sid, callbackFun))
 	} else {
+		// when finished, remove callback from map
 		if t == STREAM_END || t == STREAM_ERROR {
 			sc.callbackMap.Delete(sid)
 		}
@@ -56,20 +52,24 @@ func (sc *StreamClient) Accept(sid string, t int, d interface{}) error {
 	}
 }
 
-func GetPcpStreamAcceptBoxFun(sc *StreamClient) {
+// define the stream accept sandbox function at client
+func GetPcpStreamAcceptBoxFun(sc *StreamClient) *gopcp.BoxFunc {
 	// args = [streamId: string, t: int, d: interface{}]
-	return gopcp.ToSandboxFun(func(args []interface{}, pcpServer *gopcpc.PcpServer) (interface{}, error) {
+	return gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 		if len(args) < 3 {
-			return nil, errors.New("stream chunk format: [streamId: string, t: int, d: interface{}]")
+			return nil, streamFormatError(args)
 		} else if streamId, ok := args[0].(string); !ok {
-			return nil, errors.New("stream chunk format: [streamId: string, t: int, d: interface{}]")
-		} else if t, ok := args[1].(int); !ok {
-			return nil, errors.New("stream chunk format: [streamId: string, t: int, d: interface{}]")
+			return nil, streamFormatError(args)
+		} else if t, ok := args[1].(float64); !ok {
+			return nil, streamFormatError(args)
 		} else {
-			d, ok := args[2]
-			return nil, sc.Accept(streamId, t, d)
+			return nil, sc.Accept(streamId, int(math.Trunc(t)), args[2])
 		}
 	})
+}
+
+func streamFormatError(args []interface{}) error {
+	return errors.New(fmt.Sprintf("stream chunk format: [streamId: string, t: int, d: interface{}]. args=%v", args))
 }
 
 func GetStreamClient() *StreamClient {
