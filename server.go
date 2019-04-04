@@ -82,8 +82,8 @@ func (ss *StreamServer) StreamApi(handle func(StreamProducer, []interface{}, int
 
 // TODO support stream lazy api
 
-func GetStreamServer(clientAcceptName string, callFun CallFunc) StreamServer {
+func GetStreamServer(clientAcceptName string, callFun CallFunc) *StreamServer {
 	pcpClient := gopcp.PcpClient{}
 
-	return StreamServer{clientAcceptName, callFun, pcpClient}
+	return &StreamServer{clientAcceptName, callFun, pcpClient}
 }
