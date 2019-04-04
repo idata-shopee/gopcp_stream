@@ -35,9 +35,9 @@ func TestBase(t *testing.T) {
 
 			streamId := args[0].(string)
 
-			streamServer.sendData(streamId, 1, 10*time.Second)
-			streamServer.sendData(streamId, 2, 10*time.Second)
-			streamServer.sendData(streamId, 3, 10*time.Second)
+			streamServer.sendData(streamId, "1", 10*time.Second)
+			streamServer.sendData(streamId, "2", 10*time.Second)
+			streamServer.sendData(streamId, "3", 10*time.Second)
 			streamServer.sendEnd(streamId, 10*time.Second)
 
 			return nil, nil
@@ -45,15 +45,14 @@ func TestBase(t *testing.T) {
 	}))
 
 	// client call server stream api
-	sum := 0
+	sum := ""
 	cmd, _ := pcpClient.ToJSON(
 		pcpClient.Call("streamApi", streamClient.StreamCallback(func(t int, d interface{}) {
-			//
 			if t == STREAM_DATA {
-				sum += int(d.(float64))
+				sum += d.(string)
 			}
 		})),
 	)
 	serverSide.Execute(cmd, nil)
-	assertEqual(t, 6, sum, "")
+	assertEqual(t, "123", sum, "")
 }
