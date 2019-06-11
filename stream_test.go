@@ -2,7 +2,7 @@ package gopcp_stream
 
 import (
 	"fmt"
-	"github.com/idata-shopee/gopcp"
+	"github.com/lock-free/gopcp"
 	"testing"
 	"time"
 )

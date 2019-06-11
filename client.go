@@ -3,7 +3,7 @@ package gopcp_stream
 import (
 	"errors"
 	"fmt"
-	"github.com/idata-shopee/gopcp"
+	"github.com/lock-free/gopcp"
 	"github.com/satori/go.uuid"
 	"math"
 	"sync"
