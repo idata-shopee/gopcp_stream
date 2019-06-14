@@ -34,7 +34,7 @@ func (ss *StreamServer) SendData(streamId string, data interface{}, timeout time
 }
 
 func (ss *StreamServer) SendEnd(streamId string, timeout time.Duration) (interface{}, error) {
-	if cmd, err := ss.pcpClient.ToJSON(ss.pcpClient.Call(ss.clientAcceptName, streamId, STREAM_END)); err != nil {
+	if cmd, err := ss.pcpClient.ToJSON(ss.pcpClient.Call(ss.clientAcceptName, streamId, STREAM_END, 0)); err != nil {
 		return nil, err
 	} else {
 		return ss.callFun(cmd, timeout)
