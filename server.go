@@ -54,16 +54,16 @@ type StreamProducer struct {
 	ss       *StreamServer
 }
 
-func (ps *StreamProducer) SendData(d interface{}, timeout time.Duration) {
-	ps.ss.SendData(ps.streamId, d, timeout)
+func (ps *StreamProducer) SendData(d interface{}, timeout time.Duration) (interface{}, error) {
+	return ps.ss.SendData(ps.streamId, d, timeout)
 }
 
-func (ps *StreamProducer) SendEnd(timeout time.Duration) {
-	ps.ss.SendEnd(ps.streamId, timeout)
+func (ps *StreamProducer) SendEnd(timeout time.Duration) (interface{}, error) {
+	return ps.ss.SendEnd(ps.streamId, timeout)
 }
 
-func (ps *StreamProducer) SendError(errMsg string, timeout time.Duration) {
-	ps.ss.SendError(ps.streamId, errMsg, timeout)
+func (ps *StreamProducer) SendError(errMsg string, timeout time.Duration) (interface{}, error) {
+	return ps.ss.SendError(ps.streamId, errMsg, timeout)
 }
 
 func (ss *StreamServer) StreamApi(handle func(StreamProducer, []interface{}, interface{}, *gopcp.PcpServer) (interface{}, error)) *gopcp.BoxFunc {
