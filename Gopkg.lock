@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:fea13936fe9c3baaa02f33b05b2936f34499604a142f5329cc0dc35921115761"
+  digest = "1:95eee653e5ee8faee62cd8427761127f50ad3e0c9d2c21c8a2cfed1b438826f8"
   name = "github.com/lock-free/gopcp"
   packages = ["."]
   pruneopts = "UT"
-  revision = "8192b962db8fd9ad365e176ec04a7fd626c7af5b"
+  revision = "a1eb8ae43dbcc29ceb1af2fb4756ac43b3d64e63"
 
 [[projects]]
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
