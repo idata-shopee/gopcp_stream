@@ -47,16 +47,24 @@ func (sc *StreamClient) StreamCallback(callbackFunc StreamCallbackFunc) string {
 // simple convension for stream calling
 // (streamFunName, ...params, streamCallback)
 func (sc *StreamClient) StreamCall(streamFunName string, params ...interface{}) (*gopcp.CallResult, error) {
+	args, err := sc.ParamsToStreamParams(params)
+	if err != nil {
+		return nil, err
+	}
+	callExp := sc.pcpClient.Call(streamFunName, args...)
+	return &callExp, nil
+}
+
+// convert params to stream params which end up with a streamid which can be used to identity callback function
+func (sc *StreamClient) ParamsToStreamParams(params []interface{}) ([]interface{}, error) {
 	if len(params) < 1 {
 		return nil, errors.New("missing stream callback function for stream call.")
-	} else if callbackFun, ok := params[len(params)-1].(StreamCallbackFunc); !ok {
-		return nil, errors.New("missing stream callback function for stream call.")
-	} else {
-		callbackParam := sc.StreamCallback(callbackFun)
-		args := append(params[:len(params)-1], callbackParam)
-		callExp := sc.pcpClient.Call(streamFunName, args...)
-		return &callExp, nil
 	}
+	callbackFun, ok := params[len(params)-1].(StreamCallbackFunc)
+	if !ok {
+		return nil, errors.New("missing stream callback function for stream call.")
+	}
+	return append(params[:len(params)-1], sc.StreamCallback(callbackFun)), nil
 }
 
 // accept stream response from server
