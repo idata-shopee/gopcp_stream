@@ -71,12 +71,36 @@ func (ss *StreamServer) StreamApi(handle func(StreamProducer, []interface{}, int
 	return gopcp.ToSandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
 		if len(args) < 1 {
 			return nil, errors.New("missing stream id at the stream request")
-		} else if streamId, ok := args[len(args)-1].(string); !ok {
-			return nil, errors.New("missing stream id (string) at the stream request")
-		} else {
-			streamProducer := StreamProducer{streamId, ss}
-			return handle(streamProducer, args[:len(args)-1], attachment, pcpServer)
 		}
+
+		streamId, ok := args[len(args)-1].(string)
+
+		if !ok {
+			return nil, errors.New("missing stream id (string) at the stream request")
+		}
+
+		streamProducer := StreamProducer{streamId, ss}
+
+		return handle(streamProducer, args[:len(args)-1], attachment, pcpServer)
+	})
+}
+
+func (ss *StreamServer) LazyStreamApi(handle func(StreamProducer, []interface{}, interface{}, *gopcp.PcpServer) (interface{}, error)) *gopcp.BoxFunc {
+	// (...args, streamId)
+	return gopcp.ToLazySandboxFun(func(args []interface{}, attachment interface{}, pcpServer *gopcp.PcpServer) (interface{}, error) {
+		if len(args) < 1 {
+			return nil, errors.New("missing stream id at the stream request")
+		}
+
+		streamId, ok := args[len(args)-1].(string)
+
+		if !ok {
+			return nil, errors.New("missing stream id (string) at the stream request")
+		}
+
+		streamProducer := StreamProducer{streamId, ss}
+
+		return handle(streamProducer, args[:len(args)-1], attachment, pcpServer)
 	})
 }
 
